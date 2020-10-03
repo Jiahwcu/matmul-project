@@ -6,7 +6,7 @@ const char* dgemm_desc = "My awesome dgemm loop with blocks.";
 #endif
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 128)
+#define BLOCK_SIZE ((int) 64)
 #endif
 
 // #include <nmmintrin.h>
