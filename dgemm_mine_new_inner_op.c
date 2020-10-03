@@ -63,7 +63,7 @@ void kdgemm2P2(double * restrict C,
      * matrix multiply into the accumulated 2-by-2 product matrix, which is
      * stored in the registers cd (diagonal part) and co (off-diagonal part).
      */
-    for (int k = 0; k < P; k += 2) {
+    for (int k = 0; k < PP; k += 2) {
 
         __m128d a0 = _mm_load_pd(A+2*k+0);
         __m128d b0 = _mm_load_pd(B+2*k+0);
@@ -112,9 +112,9 @@ void kdgemm4P4(double * restrict C,
     __builtin_assume_aligned(C, 16);
 
     kdgemm2P2(C,    A+0,   B+0);
-    kdgemm2P2(C+4,  A+2*P, B+0);
-    kdgemm2P2(C+8,  A+0,   B+2*P);
-    kdgemm2P2(C+12, A+2*P, B+2*P);
+    kdgemm2P2(C+4,  A+2*PP, B+0);
+    kdgemm2P2(C+8,  A+0,   B+2*PP);
+    kdgemm2P2(C+12, A+2*PP, B+2*PP);
 }
 
 /*
@@ -135,9 +135,9 @@ void kdgemm8P8(double * restrict C,
     __builtin_assume_aligned(C, 16);
 
     kdgemm4P4(C,    A+0,   B+0);
-    kdgemm4P4(C+16, A+4*P, B+0);
-    kdgemm4P4(C+32, A+0,   B+4*P);
-    kdgemm4P4(C+48, A+4*P, B+4*P);
+    kdgemm4P4(C+16, A+4*PP, B+0);
+    kdgemm4P4(C+32, A+0,   B+4*PP);
+    kdgemm4P4(C+48, A+4*PP, B+4*PP);
 }
 
 
