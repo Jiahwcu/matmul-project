@@ -32,7 +32,7 @@ const char* dgemm_desc = "My awesome dgemm loop with blocks.";
 //     }
 // }
 
-void pad(int * s, int * d, int M, int N)
+void pad(const double * restrict s, double * restrict d, int M, int N)
 {
     int i,j;
     int K = BLOCK_SIZE;
@@ -43,7 +43,7 @@ void pad(int * s, int * d, int M, int N)
     }
 }
 
-void depad(int * s,int * d, int M, int N)
+void depad(const double * restrict s, double * restrict d, int M, int N)
 {
     int i,j;
     int K = BLOCK_SIZE;
@@ -134,10 +134,12 @@ void do_block_edge(const int lda,
     const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
-    memset(AA, 0, BLOCK_SIZE*BLOCK_SIZE * sizeof(double));
-    memset(BB, 0, BLOCK_SIZE*BLOCK_SIZE * sizeof(double));
-    memset(CC, 0, BLOCK_SIZE*BLOCK_SIZE * sizeof(double));
-    
+    int a;
+    for (a = 0; a < BLOCK_SIZE*BLOCK_SIZE; ++a ){
+	   AA[a] = 0;
+	   BB[a] = 0;
+	   CC[a] = 0;
+    }
     pad(AA, A + i + k*lda, M, K);
     pad(BB, B + k + j*lda, K, N);
     pad(CC, C + i + j*lda, M, N);
