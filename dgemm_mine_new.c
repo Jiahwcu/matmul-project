@@ -1,4 +1,4 @@
-const char* dgemm_desc = "My awesome dgemm loop with blocks.";
+const char* dgemm_desc = "My awesome dgemm two-blocking with zero-padding.";
 
 //BLOCK_SIZE need to have factor 8 !!!!
 #ifndef SMALL_BLOCK_SIZE
