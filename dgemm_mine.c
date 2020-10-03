@@ -9,6 +9,7 @@ const char* dgemm_desc = "My awesome dgemm loop with blocks.";
 #define BLOCK_SIZE ((int) 128)
 #endif
 
+
 /*
   A is M-by-K
   B is K-by-N
