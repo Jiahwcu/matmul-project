@@ -2,6 +2,14 @@ const char* dgemm_desc = "My awesome dgemm loop with blocks.";
 
 #include <nmmintrin.h>
 
+#define MM 8
+#define NN 8
+#define PP 8
+
+int DIM_M = MM;
+int DIM_N = NN;
+int DIM_K = PP;
+
 //BLOCK_SIZE need to have factor 8 !!!!
 #ifndef SMALL_BLOCK_SIZE
 #define SMALL_BLOCK_SIZE ((int) 8)
@@ -41,9 +49,9 @@ void kdgemm2P2(double * restrict C,
                const double * restrict B)
 {
     // This is really implicit in using the aligned ops...
-    __assume_aligned(A, 16);
-    __assume_aligned(B, 16);
-    __assume_aligned(C, 16);
+    __builtin_assume_aligned(A, 16);
+    __builtin_assume_aligned(B, 16);
+    __builtin_assume_aligned(C, 16);
 
     // Load diagonal and off-diagonals
     __m128d cd = _mm_load_pd(C+0);
@@ -54,7 +62,7 @@ void kdgemm2P2(double * restrict C,
      * matrix multiply into the accumulated 2-by-2 product matrix, which is
      * stored in the registers cd (diagonal part) and co (off-diagonal part).
      */
-    for (int k = 0; k < P; k += 2) {
+    for (int k = 0; k < PP; k += 2) {
 
         __m128d a0 = _mm_load_pd(A+2*k+0);
         __m128d b0 = _mm_load_pd(B+2*k+0);
@@ -98,14 +106,14 @@ void kdgemm4P4(double * restrict C,
                const double * restrict A,
                const double * restrict B)
 {
-    __assume_aligned(A, 16);
-    __assume_aligned(B, 16);
-    __assume_aligned(C, 16);
+    __builtin_assume_aligned(A, 16);
+    __builtin_assume_aligned(B, 16);
+    __builtin_assume_aligned(C, 16);
 
     kdgemm2P2(C,    A+0,   B+0);
-    kdgemm2P2(C+4,  A+2*P, B+0);
-    kdgemm2P2(C+8,  A+0,   B+2*P);
-    kdgemm2P2(C+12, A+2*P, B+2*P);
+    kdgemm2P2(C+4,  A+2*PP, B+0);
+    kdgemm2P2(C+8,  A+0,   B+2*PP);
+    kdgemm2P2(C+12, A+2*PP, B+2*PP);
 }
 
 /*
@@ -121,14 +129,14 @@ void kdgemm8P8(double * restrict C,
                const double * restrict A,
                const double * restrict B)
 {
-    __assume_aligned(A, 16);
-    __assume_aligned(B, 16);
-    __assume_aligned(C, 16);
+    __builtin_assume_aligned(A, 16);
+    __builtin_assume_aligned(B, 16);
+    __builtin_assume_aligned(C, 16);
 
     kdgemm4P4(C,    A+0,   B+0);
-    kdgemm4P4(C+16, A+4*P, B+0);
-    kdgemm4P4(C+32, A+0,   B+4*P);
-    kdgemm4P4(C+48, A+4*P, B+4*P);
+    kdgemm4P4(C+16, A+4*PP, B+0);
+    kdgemm4P4(C+32, A+0,   B+4*PP);
+    kdgemm4P4(C+48, A+4*PP, B+4*PP);
 }
 
 
@@ -139,8 +147,8 @@ void to_kdgemm_A(int ldA,
                  const double * restrict A,
                  double * restrict Ak)
 {
-    for (int i = 0; i < M; i += 2)
-        for (int j = 0; j < P; ++j) {
+    for (int i = 0; i < MM; i += 2)
+        for (int j = 0; j < PP; ++j) {
             Ak[0] = A[(i+0) + j*ldA];
             Ak[1] = A[(i+1) + j*ldA];
             Ak += 2;
@@ -155,8 +163,8 @@ void to_kdgemm_B(int ldB,
                  const double * restrict B,
                  double * restrict Bk)
 {
-    for (int j = 0; j < N; j += 2)
-        for (int i = 0; i < P; ++i) {
+    for (int j = 0; j < NN; j += 2)
+        for (int i = 0; i < PP; ++i) {
             Bk[0] = B[i + (j+0)*ldB];
             Bk[1] = B[i + (j+1)*ldB];
             Bk += 2;
@@ -267,7 +275,7 @@ void basic_dgemm_square(const double * restrict A, const double * restrict B, do
                 const int i = bi * SMALL_BLOCK_SIZE;
                 //basic_dgemm(M, SMALL_BLOCK_SIZE, SMALL_BLOCK_SIZE, SMALL_BLOCK_SIZE, A + i + k*M, B + k + j*M, C + i + j*M);
                 //dgemm_small(A+i+k*M, B+k+j*M, C+i+j*M);
-                kdgemm(A+i+k*M, B+k+j*M, C+i+j*M)
+                kdgemm(A+i+k*M, B+k+j*M, C+i+j*M);
             }
         }
     }
