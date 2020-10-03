@@ -226,8 +226,8 @@ void basic_dgemm_square(const double * restrict A, const double * restrict B, do
             for (bi = 0; bi < n_blocks; ++bi) {
                 const int i = bi * SMALL_BLOCK_SIZE;
                 //basic_dgemm(M, SMALL_BLOCK_SIZE, SMALL_BLOCK_SIZE, SMALL_BLOCK_SIZE, A + i + k*M, B + k + j*M, C + i + j*M);
-                dgemm_small(A+i+k*M, B+k+j*M, C+i+j*M);
-                //kdgemm(A+i+k*M, B+k+j*M, C+i+j*M);
+                //dgemm_small(A+i+k*M, B+k+j*M, C+i+j*M);
+                kdgemm(A+i+k*M, B+k+j*M, C+i+j*M);
             }
         }
     }
