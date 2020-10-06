@@ -16,40 +16,25 @@ const char* dgemm_desc = "My awesome dgemm loop with blocks.";
 
   lda is the leading dimension of the matrix (the M of square_dgemm).
 */
-// void basic_dgemm(const int lda, const int M, const int N, const int K,
-//                  const double * restrict A, const double * restrict B, double * restrict C)
-// {
-//     int i, j, k;
-//     for (j = 0; j < N; ++j) {
-//         for (k = 0; k < K; ++k) {
-//             double s = B[j*lda+k];
-//             for (i = 0; i < M; ++i) {
-//                 double cij = C[j*lda+i];
-//                 cij += A[k*lda+i] * s;
-//                 C[j*lda+i] = cij;
-//             }
-//         }
-//     }
-// }
 
-void pad(const double * restrict s, double * restrict d, int M, int N)
+void pad(const double * restrict s, double * restrict d, const int M, const int N, const int lda)
 {
     int i,j;
     int K = BLOCK_SIZE;
     for(j = 0; j < N; ++j){
         for(i = 0; i < M; ++i){
-            *(d + j*K + i) = *(s + j*M + i);
+            *(d + j*K + i) = *(s + j*lda + i);
         }
     }
 }
 
-void depad(const double * restrict s, double * restrict d, int M, int N)
+void depad(const double * restrict s, double * restrict d, const int M, const int N, const int lda)
 {
     int i,j;
     int K = BLOCK_SIZE;
     for(j = 0; j < N; ++j){
         for(i = 0; i < M; ++i){
-            *(d + j*M + i)=*(s + j*K + i);
+            *(d + j*lda + i)=*(s + j*K + i);
         }
     }
 }
@@ -140,13 +125,13 @@ void do_block_edge(const int lda,
 	   BB[a] = 0;
 	   CC[a] = 0;
     }
-    pad(AA, A + i + k*lda, M, K);
-    pad(BB, B + k + j*lda, K, N);
-    pad(CC, C + i + j*lda, M, N);
+    pad(A + i + k*lda, AA, M, K, lda);
+    pad(B + k + j*lda, BB, K, N, lda);
+    pad(C + i + j*lda, CC, M, N, lda);
 
     basic_dgemm_square(AA, BB, CC);
 
-    depad(CC, C + i + j*lda, M, N);
+    depad(CC, C + i + j*lda, M, N, lda);
     // basic_dgemm(lda, M, N, K,
     //             A + i + k*lda, B + k + j*lda, C + i + j*lda);
 }
