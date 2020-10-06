@@ -1,5 +1,14 @@
 const char* dgemm_desc = "My awesome dgemm loop with blocks.";
 
+//BLOCK_SIZE need to have factor 8 !!!!
+#ifndef SMALL_BLOCK_SIZE
+#define SMALL_BLOCK_SIZE ((int) 8)
+#endif
+
+#ifndef BLOCK_SIZE
+#define BLOCK_SIZE ((int) 128)
+#endif
+
 // #include <nmmintrin.h>
 
 
@@ -10,15 +19,6 @@ const char* dgemm_desc = "My awesome dgemm loop with blocks.";
 // int DIM_M = MM;
 // int DIM_N = NN;
 // int DIM_K = PP;
-
-// //BLOCK_SIZE need to have factor 8 !!!!
-// #ifndef SMALL_BLOCK_SIZE
-// #define SMALL_BLOCK_SIZE ((int) 8)
-// #endif
-
-// #ifndef BLOCK_SIZE
-// #define BLOCK_SIZE ((int) 128)
-// #endif
 
 // /*
 //  * On the Nehalem architecture, shufpd and multiplication use the same port.
