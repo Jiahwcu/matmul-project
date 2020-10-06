@@ -68,17 +68,6 @@ void basic_dgemm_square(const double * restrict A, const double * restrict B, do
     }
 }
 
-void do_block(const int lda,
-              const double *A, const double *B, double *C,
-              const int i, const int j, const int k)
-{
-    const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
-    const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
-    const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
-    basic_dgemm(lda, M, N, K,
-                A + i + k*lda, B + k + j*lda, C + i + j*lda);
-}
-
 void do_copy_square_in(const int lda, const double * restrict A,  double * restrict AA){
     int i, j, k;
     const int M = BLOCK_SIZE;
@@ -121,6 +110,17 @@ void do_block_square(const int lda,
     do_copy_square_out(lda, C+i+j*lda, CC);
     //printf("Cij, %f\n", C[i+j*lda]);
     //printf("CC , %f\n", CC[0]);
+}
+
+void do_block(const int lda,
+              const double *A, const double *B, double *C,
+              const int i, const int j, const int k)
+{
+    const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
+    const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
+    const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
+    basic_dgemm(lda, M, N, K,
+                A + i + k*lda, B + k + j*lda, C + i + j*lda);
 }
 
 void square_dgemm(const int M, const double *A, const double *B, double *C)
