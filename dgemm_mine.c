@@ -69,21 +69,21 @@ void basic_dgemm_square(const double * restrict A, const double * restrict B, do
 }
 
 void do_copy_square_in(const int lda, const double * restrict A,  double * restrict AA){
-    int i, j, k;
+    int i, j;
     const int M = BLOCK_SIZE;
-    for(i = 0; i < M; ++i){
-        for(j = 0; j < M; ++j){
-            AA[i*M+j] = A[i*lda+j];
+    for(j = 0; j < M; ++j){
+        for(i = 0; i < M; ++i){
+            AA[j*M+i] = A[j*lda+i];
         }
     }
 }
 
 void do_copy_square_out(const int lda, double * restrict A, const double *restrict  AA){
-    int i, j, k;
+    int i, j;
     const int M = BLOCK_SIZE;
-    for(i = 0; i < M; ++i){
-        for(j = 0; j < M; ++j){
-             A[i*lda+j] = AA[i*M+j];
+    for(j = 0; j < M; ++j){
+        for(i = 0; i < M; ++i){
+             A[j*lda+i] = AA[j*M+i];
         }
     }
 }
