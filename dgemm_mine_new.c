@@ -9,6 +9,29 @@ const char* dgemm_desc = "My awesome dgemm two-blocking with zero-padding.";
 #define BLOCK_SIZE ((int) 128)
 #endif
 
+/*
+  A is M-by-K
+  B is K-by-N
+  C is M-by-N
+
+  lda is the leading dimension of the matrix (the M of square_dgemm).
+*/
+void basic_dgemm(const int lda, const int M, const int N, const int K,
+                 const double * restrict A, const double * restrict B, double * restrict C)
+{
+    int i, j, k;
+    for (j = 0; j < N; ++j) {
+        for (k = 0; k < K; ++k) {
+            double s = B[j*lda+k];
+            for (i = 0; i < M; ++i) {
+                double cij = C[j*lda+i];
+                cij += A[k*lda+i] * s;
+                C[j*lda+i] = cij;
+            }
+        }
+    }
+}
+
 // pad to from M*N to K*K
 void pad(const double * restrict s, double * restrict d, const int M, const int N, const int lda)
 {
@@ -112,11 +135,16 @@ void do_block_edge(const int lda,
     const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
-    int a;
+    if (M < BLOCK_SIZE/2 | N < BLOCK_SIZE/2 | K < BLOCK_SIZE/2){
+        basic_dgemm(lda, M, N, K,
+                A + i + k*lda, B + k + j*lda, C + i + j*lda);
+    }
+    else{
+        int a;
     for (a = 0; a < BLOCK_SIZE*BLOCK_SIZE; ++a ){
-	   AA[a] = 0;
-	   BB[a] = 0;
-	   CC[a] = 0;
+       AA[a] = 0;
+       BB[a] = 0;
+       CC[a] = 0;
     }
     pad(A + i + k*lda, AA, M, K, lda);
     pad(B + k + j*lda, BB, K, N, lda);
@@ -125,8 +153,8 @@ void do_block_edge(const int lda,
     basic_dgemm_square(AA, BB, CC);
 
     depad(CC, C + i + j*lda, M, N, lda);
-    // basic_dgemm(lda, M, N, K,
-    //             A + i + k*lda, B + k + j*lda, C + i + j*lda);
+    }
+    
 }
 
 void square_dgemm(const int M, const double *A, const double *B, double *C)
